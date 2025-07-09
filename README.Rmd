@@ -26,14 +26,14 @@ You can install the development version of CEIDR like so:
 
 ```{r}
 # install.packages("devtools")
-#devtools::install_github("RuyiPan/CEIDR")
+# devtools::install_github("RuyiPan/CEIDR")
 ```
 
 ## Example
 
 This is a basic example which shows you how to solve a common problem:
 
-```{r example}
+```{r example, message=FALSE}
 library(CEIDR)
 ## basic example code
 ```

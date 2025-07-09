@@ -1,0 +1,21 @@
+Package: CEIDR
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Ruyi", "Pan",
+      email = "ruyi.pan@mail.utoronto.ca",
+      role = c("aut", "cre")
+    )
+  )
+Description: This package is for testing individual differences in intermodal coupling.
+    Continuation lines should be indented.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    R (>= 3.1)
+Imports:
+    clean gamlss
+RoxygenNote: 7.2.3

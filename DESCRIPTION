@@ -19,3 +19,5 @@ Depends:
 Imports:
     clean gamlss
 RoxygenNote: 7.2.3
+URL: https://github.com/RuyiPan/CEIDR
+BugReports: https://github.com/RuyiPan/CEIDR/issues

@@ -1,8 +1,8 @@
 #build the nearest neighbors matrix for within-subject adjustment
-buildWNNmatrix <- function(distMat, max.radius = 20) {
+buildWNNmatrix <- function(distMat, within.radius = 20) {
   p <- nrow(distMat)
   weights <- matrix(1,p,p)
-  weights[distMat > max.radius] <- 0
+  weights[distMat > within.radius] <- 0
 
   # Get nonzero entries for sparse matrix construction
   idx <- which(weights > 0, arr.ind = TRUE)

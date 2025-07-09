@@ -1,3 +1,6 @@
-useDynLib()
+useDynLib(CEIDR)
 importFrom(Rcpp, evalCpp)
+importFrom(RcppArmadillo)
+importFrom(Matrix)
 export(Ceidr)
+export(hello)

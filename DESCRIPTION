@@ -15,10 +15,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends: 
-    R (>= 3.1)
-Imports:
-    CLEAN,
-    gamlss, Matrix, Rcpp, RcppArmadillo
+    R (>= 3.1), gamlss, Matrix, Rcpp, RcppArmadillo, CLEAN
 Remotes:
     junjypark/CLEAN
 RoxygenNote: 7.2.3

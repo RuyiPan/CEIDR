@@ -3,8 +3,8 @@ Ceidr=function(m1, m2, cov_df, distmat,
                cortex=NULL,
                cov.nuisance = NULL,
                cov.interest = NULL,
-               between.mod =list(formula1=~1, sigma.formula1=~1, family1=NO(),
-                                 formula2=~1, sigma.formula2=~1, family2=NO()), #for mean and varaince modelling,
+               between.mod =list(mu.formula1=~1, sigma.formula1=~1, family1=NO(),
+                                 mu.formula2=~1, sigma.formula2=~1, family2=NO()), #for mean and varaince modelling,
                within.radius=5, #if within mean and variance adjustment
                parallel=F,
                ncores=1,
@@ -21,13 +21,13 @@ Ceidr=function(m1, m2, cov_df, distmat,
   } else{
     cortex= 1:V
   }
-
+  print("stageI-step1")
   # stageI-step1, between-subject mean and variance adjustment
-  res1 <- MeanVarBetween(m1, cov_df, between.mod$formula1, between.mod$sigma.formula1, between.mod$family1)
-  res2 <- MeanVarBetween(m2, cov_df, between.mod$formula2, between.mod$sigma.formula2, between.mod$family2)
+  res1 <- MeanVarBetween(m1, cov_df, between.mod$mu.formula1, between.mod$sigma.formula1, between.mod$family1)
+  res2 <- MeanVarBetween(m2, cov_df, between.mod$mu.formula2, between.mod$sigma.formula2, between.mod$family2)
 
   # stageI-stepw, within-subject mean and variance adjustment
-  WNNmatrix <- buildWNNmatrix(distmat, within.radius = 5)
+  WNNmatrix <- buildWNNmatrix(distmat, within.radius = within.radius)
   res1 <- MeanVarWithin(res1, WNNmatrix)
   res2 <- MeanVarWithin(res2, WNNmatrix)
 
@@ -41,7 +41,7 @@ Ceidr=function(m1, m2, cov_df, distmat,
     cov.interest = cov_df[, cov.interest],
     sacf = NULL,
     max.radius = 15,
-    perm=perm,
+    # perm=perm,
     nperm = 2000,
     alpha = 0.05,
     alternative = "two.sided",
@@ -53,4 +53,6 @@ Ceidr=function(m1, m2, cov_df, distmat,
     parallel = FALSE,
     ncores = 1
   )
+  cider$couplings <- rho
+  return(cider)
 }

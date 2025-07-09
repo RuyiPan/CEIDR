@@ -4,79 +4,34 @@
 using namespace Rcpp;
 using namespace arma;
 
-// // [[Rcpp::export]]
-// arma::mat adjust_local_variance(const arma::mat& m1,
-//                                 const arma::sp_mat& NNmatrix) {
-//   int N = m1.n_rows;  // number of individuals
-//   int V = m1.n_cols;  // number of vertices
-//
-//   arma::mat norm_mat(N, V, arma::fill::zeros);
-//
-//   for (int v = 0; v < V; ++v) {
-//     arma::uvec neighbors = arma::find(NNmatrix.row(v));
-//     int K = neighbors.n_elem;
-//
-//     if (K == 0) {
-//       norm_mat.col(v).fill(arma::datum::nan);
-//       continue;
-//     }
-//
-//     if (K == 1) {
-//       norm_mat.col(v) = m1.col(neighbors[0]);
-//       continue;
-//     }
-//
-//     arma::mat X = m1.cols(neighbors);  // N x K
-//
-//     // Row-wise sum of squares
-//     arma::vec x_ss = arma::sum(X % X, 1);  // N x 1
-//
-//     // Sample variance (uncentered)
-//     arma::vec x_var = x_ss / static_cast<double>(K - 1);
-//
-//     arma::vec denom = arma::sqrt(x_var);  // N x 1
-//
-//     for (int i = 0; i < N; ++i) {
-//       norm_mat(i, v) = (denom(i) > 0) ? m1(i, v) / denom(i) : m1(i, v);
-//     }
-//   }
-//
-//   return norm_mat;
-// }
-
-
 // [[Rcpp::export]]
-arma::mat MeanVarWithin(const arma::mat& m1,
-                                   const arma::sp_mat& NNmatrix) {
-  int N = m1.n_rows;
-  int V = m1.n_cols;
-  arma::mat m1_norm(N, V, arma::fill::zeros);
+arma::mat MeanVarWithin(const arma::mat& m, const arma::sp_mat& NNmatrix) {
+  int N = m.n_rows;  // number of subjects
+  int V = m.n_cols;  // number of vertices
+
+  arma::mat m_adjusted(N, V, arma::fill::zeros);
 
   for (int v = 0; v < V; ++v) {
     arma::uvec neighbors = arma::find(NNmatrix.row(v));
     int K = neighbors.n_elem;
 
-    if (K == 0) {
-      m1_norm.col(v).fill(arma::datum::nan);
+    if (K == 1) {
+      m_adjusted.col(v) = m.col(neighbors[0]);
       continue;
     }
 
-    // Submatrix: N x K (each row is one subject’s neighbor values)
-    arma::mat neighbor_vals = m1.cols(neighbors);
+    arma::mat m_neighbors = m.cols(neighbors);
+    arma::mat row_mean = arma::mean(m_neighbors, 1);  // N x 1
+    arma::mat centered = m_neighbors.each_col() - row_mean;
 
-    // Compute row-wise mean and std dev
-    arma::vec row_mean = arma::mean(neighbor_vals, 1);            // N x 1
-    arma::vec row_sd   = arma::stddev(neighbor_vals, 0, 1);       // N x 1, normalize by N-1
+    // Fixed: compute row-wise sample variance manually
+    arma::vec row_var = arma::sum(centered % centered, 1) / (K - 1.0);
+    row_var.transform([](double val) { return val == 0.0 ? 1.0 : val; });
 
-    for (int i = 0; i < N; ++i) {
-      double sd = row_sd(i);
-      double mu = row_mean(i);
-      // Apply z-score normalization
-      m1_norm(i, v) = (sd > 0) ? (m1(i, v) - mu) / sd : m1(i, v);
-    }
+    arma::mat m_std = (m.col(v) - row_mean) / arma::sqrt(row_var);
+    m_adjusted.col(v) = m_std;
   }
 
-  return m1_norm;
+  return m_adjusted;
 }
-
 

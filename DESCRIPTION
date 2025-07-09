@@ -18,9 +18,11 @@ Depends:
     R (>= 3.1)
 Imports:
     CLEAN,
-    gamlss
+    gamlss, Matrix, Rcpp, RcppArmadillo
 Remotes:
     junjypark/CLEAN
 RoxygenNote: 7.2.3
 URL: https://github.com/RuyiPan/CEIDR
 BugReports: https://github.com/RuyiPan/CEIDR/issues
+LinkingTo: 
+    Rcpp, RcppArmadillo

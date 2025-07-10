@@ -7,9 +7,14 @@
 #' @param cov.df A data frame of subject-level covariates (rows aligned with subjects in `m1`/`m2`).
 #' @param distmat A vertex × vertex spatial distance matrix.
 #' @param cortex Optional vector of vertex indices to include. If `NULL`, all vertices are used.
-#' @param cov.nuisance Character vector of column names in `cov_df` to adjust for as nuisance covariates.
-#' @param cov.interest Character vector of column names in `cov_df` that are the covariates of interest.
+#' @param cov.nuisance Character vector of column names in `cov.df` to adjust for as nuisance covariates.
+#' @param cov.interest Character vector of column names in `cov.df` that are the covariates of interest.
 #' @param between.mod For between-subject adjustment: a list specifying modeling formulas and GAMLSS families:
+#'   If \code{between.mod = "default"}, the function will automatically construct a default linear model using all covariates
+#'   provided via \code{cov.interest} and \code{cov.nuisance} as fixed effects. The same formula will be used for both
+#'   the mean (\code{mu.formula1}, \code{mu.formula2}) and variance (\code{sigma.formula1}, \code{sigma.formula2})
+#'   components. The GAMLSS families default to \code{NO()} for both modalities.
+#'   If \code{between.mod = NULL}, the function will skipp between-subject adjustment
 #'   \describe{
 #'     \item{mu.formula1, mu.formula2}{Formulas for the mean of modality 1 and 2}
 #'     \item{sigma.formula1, sigma.formula2}{Formulas for the variance of modality 1 and 2}
@@ -17,7 +22,7 @@
 #'   }
 #' @param within.radius Radius (in distance units) used to define the local neighborhood for within-subject adjustment.
 #' @param max.radius Maximum radius for spatial cluster enhancement in the permutation step.
-#' @param perm Type of permutation. Currently supports \code{"Manly"} or \code{"Draper–Stoneman"}.
+#' @param perm Type of permutation. Currently supports \code{"Draper–Stoneman"} (permute cov.interesst) or \code{"Manly"} (permute (cov.interesst, cov.nuisance)).
 #' @param nperm Number of permutations to run for inference.
 #' @param alpha Significance level used in inference (default is 0.05).
 #' @param parallel Logical, whether to use parallel processing for spatial permutation inference.
@@ -39,8 +44,8 @@
 #' }
 #'
 #' @examples
-#' Example (with simulated data)
-#' Ceidr(m1, m2, cov_df, distmat, cov.interest = c("x"),  cov.nuisance = c("z"))
+#'
+#' Ceidr(Data$m1, Data$m2, Data$cov.df, Data$distmat, cov.interest = c("x"),  cov.nuisance = c("z"))
 #'
 #' @references
 #' TODO
@@ -50,8 +55,8 @@ Ceidr=function(m1, m2, cov.df, distmat,
                cortex=NULL,
                cov.nuisance = NULL,
                cov.interest = NULL,
-               between.mod = list(mu.formula1=~1, sigma.formula1=~1, family1=NO(),
-                                 mu.formula2=~1, sigma.formula2=~1, family2=NO()),
+               between.mod = list(mu.formula1=y~1, sigma.formula1=~1, family1=NO(),
+                                 mu.formula2=y~1, sigma.formula2=~1, family2=NO()),
                within.radius=5,
                max.radius = 15,
                perm="Manly",
@@ -68,18 +73,43 @@ Ceidr=function(m1, m2, cov.df, distmat,
   } else{
     cortex= 1:V
   }
+  if (is.null(cov.interest)) {
+    stop("Error: cov.interest should be provided")
+  }
 
-  # stageI-step1, between-subject mean and variance adjustment
-  res1 <- MeanVarBetween(m1, cov.df, between.mod$mu.formula1, between.mod$sigma.formula1, between.mod$family1)
-  res2 <- MeanVarBetween(m2, cov.df, between.mod$mu.formula2, between.mod$sigma.formula2, between.mod$family2)
+  if (is.null(between.mod)) {
+    res1.1 <- m1
+    res2.1 <- m2
+  } else if (identical(between.mod, "default")) {
+    covariates <- c(cov.nuisance, cov.interest)
+      formula_str <- paste("~", paste(covariates, collapse = " + "))
+      mu.f <- as.formula(paste("y ~", paste(covariates, collapse = " + ")))
+      sigma.f <- as.formula( paste("~", paste(covariates, collapse = " + ")))
+      between.mod <- list(
+        mu.formula1 = mu.f,
+        sigma.formula1 = sigma.f,
+        family1 = NO(),
+        mu.formula2 = mu.f,
+        sigma.formula2 = sigma.f,
+        family2 = NO()
+      )
+    # stageI-step1, between-subject mean and variance adjustment
+    res1.1 <- MeanVarBetween(m1, cov.df, between.mod$mu.formula1, between.mod$sigma.formula1, between.mod$family1)
+    res2.1 <- MeanVarBetween(m2, cov.df, between.mod$mu.formula2, between.mod$sigma.formula2, between.mod$family2)
+  } else {
+    res1.1 <- MeanVarBetween(m1, cov.df, between.mod$mu.formula1, between.mod$sigma.formula1, between.mod$family1)
+    res2.1 <- MeanVarBetween(m2, cov.df, between.mod$mu.formula2, between.mod$sigma.formula2, between.mod$family2)
+  }
+
+
 
   # stageI-step2, within-subject mean and variance adjustment
   WNNmatrix <- buildWNNmatrix(distmat, within.radius = within.radius)
-  res1 <- MeanVarWithin(res1, WNNmatrix)
-  res2 <- MeanVarWithin(res2, WNNmatrix)
+  res1.2 <- MeanVarWithin(res1.1, WNNmatrix)
+  res2.2 <- MeanVarWithin(res2.1, WNNmatrix)
 
   #compute intermodal couplings
-  rho <- res1 * res2
+  rho <- res1.2 * res2.2
 
   mod0 <- if (is.null(cov.nuisance)) NULL else model.matrix(~ cov.df[, cov.nuisance])
 
@@ -90,7 +120,7 @@ Ceidr=function(m1, m2, cov.df, distmat,
     cov.interest = cov.df[, cov.interest],
     sacf = NULL,
     max.radius = 15,
-    # perm=perm,
+    perm= perm,
     nperm = 2000,
     alpha = 0.05,
     alternative = "two.sided",

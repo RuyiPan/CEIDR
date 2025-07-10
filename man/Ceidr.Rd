@@ -12,8 +12,8 @@ Ceidr(
   cortex = NULL,
   cov.nuisance = NULL,
   cov.interest = NULL,
-  between.mod = list(mu.formula1 = ~1, sigma.formula1 = ~1, family1 = NO(), mu.formula2 =
-    ~1, sigma.formula2 = ~1, family2 = NO()),
+  between.mod = list(mu.formula1 = y ~ 1, sigma.formula1 = ~1, family1 = NO(),
+    mu.formula2 = y ~ 1, sigma.formula2 = ~1, family2 = NO()),
   within.radius = 5,
   max.radius = 15,
   perm = "Manly",
@@ -35,11 +35,16 @@ Ceidr(
 
 \item{cortex}{Optional vector of vertex indices to include. If `NULL`, all vertices are used.}
 
-\item{cov.nuisance}{Character vector of column names in `cov_df` to adjust for as nuisance covariates.}
+\item{cov.nuisance}{Character vector of column names in `cov.df` to adjust for as nuisance covariates.}
 
-\item{cov.interest}{Character vector of column names in `cov_df` that are the covariates of interest.}
+\item{cov.interest}{Character vector of column names in `cov.df` that are the covariates of interest.}
 
 \item{between.mod}{For between-subject adjustment: a list specifying modeling formulas and GAMLSS families:
+If \code{between.mod = "default"}, the function will automatically construct a default linear model using all covariates
+provided via \code{cov.interest} and \code{cov.nuisance} as fixed effects. The same formula will be used for both
+the mean (\code{mu.formula1}, \code{mu.formula2}) and variance (\code{sigma.formula1}, \code{sigma.formula2})
+components. The GAMLSS families default to \code{NO()} for both modalities.
+If \code{between.mod = NULL}, the function will skipp between-subject adjustment
 \describe{
   \item{mu.formula1, mu.formula2}{Formulas for the mean of modality 1 and 2}
   \item{sigma.formula1, sigma.formula2}{Formulas for the variance of modality 1 and 2}
@@ -50,7 +55,7 @@ Ceidr(
 
 \item{max.radius}{Maximum radius for spatial cluster enhancement in the permutation step.}
 
-\item{perm}{Type of permutation. Currently supports \code{"Manly"} or \code{"Draper–Stoneman"}.}
+\item{perm}{Type of permutation. Currently supports \code{"Draper–Stoneman"} (permute cov.interesst) or \code{"Manly"} (permute (cov.interesst, cov.nuisance)).}
 
 \item{nperm}{Number of permutations to run for inference.}
 
@@ -81,8 +86,8 @@ A list with the following components:
 Run CEIDR to test individual differences in spatially-structured intermodal coupling.
 }
 \examples{
-Example (with simulated data)
-Ceidr(m1, m2, cov_df, distmat, cov.interest = c("x"),  cov.nuisance = c("z"))
+
+Ceidr(Data$m1, Data$m2, Data$cov.df, Data$distmat, cov.interest = c("x"),  cov.nuisance = c("z"))
 
 }
 \references{

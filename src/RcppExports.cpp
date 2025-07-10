@@ -12,14 +12,14 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // MeanVarWithin
-arma::mat MeanVarWithin(const arma::mat& m1, const arma::sp_mat& NNmatrix);
-RcppExport SEXP _CEIDR_MeanVarWithin(SEXP m1SEXP, SEXP NNmatrixSEXP) {
+arma::mat MeanVarWithin(const arma::mat& m, const arma::sp_mat& NNmatrix);
+RcppExport SEXP _CEIDR_MeanVarWithin(SEXP mSEXP, SEXP NNmatrixSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type m1(m1SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type m(mSEXP);
     Rcpp::traits::input_parameter< const arma::sp_mat& >::type NNmatrix(NNmatrixSEXP);
-    rcpp_result_gen = Rcpp::wrap(MeanVarWithin(m1, NNmatrix));
+    rcpp_result_gen = Rcpp::wrap(MeanVarWithin(m, NNmatrix));
     return rcpp_result_gen;
 END_RCPP
 }

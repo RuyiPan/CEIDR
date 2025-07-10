@@ -1,6 +1,10 @@
+#' Cluster Enhancement for testing Individual Differences in intermodal coupling (r)
+#'
+#' Run CEIDR to test individual differences in spatially-structured intermodal coupling.
+#'
 #' @param m1 A matrix of modality 1 values (subjects × vertices).
 #' @param m2 A matrix of modality 2 values (same dimensions as `m1`).
-#' @param cov_df A data frame of subject-level covariates (rows aligned with subjects in `m1`/`m2`).
+#' @param cov.df A data frame of subject-level covariates (rows aligned with subjects in `m1`/`m2`).
 #' @param distmat A vertex × vertex spatial distance matrix.
 #' @param cortex Optional vector of vertex indices to include. If `NULL`, all vertices are used.
 #' @param cov.nuisance Character vector of column names in `cov_df` to adjust for as nuisance covariates.
@@ -19,6 +23,27 @@
 #' @param parallel Logical, whether to use parallel processing for spatial permutation inference.
 #' @param ncores Number of CPU cores to use when \code{parallel = TRUE}.
 #' @param seed Random seed for reproducibility.
+#'
+#' @return A list with the following components:
+#' \describe{
+#'   \item{Tstat}{A length-\code{V} vector of cluster-enhanced test statistics obtained by CLEAN. Non-cortex vertices take the value 0.}
+#'   \item{Tstat_thresholded}{Cluster-enhanced test statistics thresholded at a pre-set FWER level (\code{alpha}). Vertices not passing the threshold are shrunk to 0. Non-cortex vertices are 0.}
+#'   \item{permMax}{A length-\code{nperm} vector of the maximum cluster-enhanced test statistic across all vertices for each permutation. Used to compute FWER-controlling threshold.}
+#'   \item{permMin}{A length-\code{nperm} vector of the minimum cluster-enhanced test statistic across all vertices for each permutation.}
+#'   \item{threshold}{FWER-controlling threshold.}
+#'   \item{nperm}{Number of permutations used.}
+#'   \item{seed}{Random seed used.}
+#'   \item{nlocations}{Number of cortical vertices used in the analysis.}
+#'   \item{alternative}{Type of alternative hypothesis: \code{"two.sided"}, \code{"greater"}, or \code{"less"}.}
+#'   \item{couplings}{Estimated subject-level intermodal couplings.}
+#' }
+#'
+#' @examples
+#' Example (with simulated data)
+#' Ceidr(m1, m2, cov_df, distmat, cov.interest = c("x"),  cov.nuisance = c("z"))
+#'
+#' @references
+#' TODO
 #'
 #' @export
 Ceidr=function(m1, m2, cov.df, distmat,

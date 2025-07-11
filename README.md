@@ -6,8 +6,12 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-**Cluster Enhancement for testing Individual Differences in $\rho$
-(r).**
+<span style="font-size: 20px; font-weight: bold;"> Cluster Enhancement
+for testing Individual Differences in $\rho$ (r). </span>
+
+<br>
+
+![](man/figure/schematic_ceidr.png) <br>
 
 ## Installation
 

@@ -6,8 +6,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-<span style="font-weight: bold; font-size: 20px;"> Cluster Enhancement
-for testing Individual Differences in $\rho$ (r). </span>
+#### **Cluster Enhancement for testing Individual Differences in $\rho$ (r)**
 
 <br>
 

@@ -9,18 +9,19 @@
 #' @param cortex Optional vector of vertex indices to include. If `NULL`, all vertices are used.
 #' @param cov.nuisance Character vector of column names in `cov.df` to adjust for as nuisance covariates.
 #' @param cov.interest Character vector of column names in `cov.df` that are the covariates of interest.
-#' @param between.mod For between-subject adjustment: a list specifying modeling formulas and GAMLSS families:
-#'   If \code{between.mod = "default"}, the function will automatically construct a default linear model using all covariates
+#' @param between.mod For between-subject adjustment: a list specifying modeling formulas for GAMLSS:
+#'   If \code{between.mod = NULL}, the function will automatically construct a default linear model using all covariates
 #'   provided via \code{cov.interest} and \code{cov.nuisance} as fixed effects. The same formula will be used for both
 #'   the mean (\code{mu.formula1}, \code{mu.formula2}) and variance (\code{sigma.formula1}, \code{sigma.formula2})
 #'   components. The GAMLSS families default to \code{NO()} for both modalities.
-#'   If \code{between.mod = NULL}, the function will skipp between-subject adjustment
+#'   If \code{between.mod = "skip"}, the function will skip between-subject adjustment
 #'   \describe{
 #'     \item{mu.formula1, mu.formula2}{Formulas for the mean of modality 1 and 2}
 #'     \item{sigma.formula1, sigma.formula2}{Formulas for the variance of modality 1 and 2}
 #'     \item{family1, family2}{GAMLSS families for each modality (e.g., \code{NO()})}
 #'   }
 #' @param within.radius Radius (in distance units) used to define the local neighborhood for within-subject adjustment.
+#'   If \code{within.radius = 0}, the function will skip within-subject adjustment.
 #' @param max.radius Maximum radius for spatial cluster enhancement in the permutation step.
 #' @param perm Type of permutation. Currently supports \code{"Draper–Stoneman"} (permute cov.interesst) or \code{"Manly"} (permute (cov.interesst, cov.nuisance)).
 #' @param nperm Number of permutations to run for inference.
@@ -77,10 +78,10 @@ Ceidr=function(m1, m2, cov.df, distmat,
     stop("Error: cov.interest should be provided")
   }
 
-  if (is.null(between.mod)) {
+  if (identical(between.mod, "skip")) {
     res1.1 <- m1
     res2.1 <- m2
-  } else if (identical(between.mod, "default")) {
+  } else if (is.null(between.mod)) {
     covariates <- c(cov.nuisance, cov.interest)
       formula_str <- paste("~", paste(covariates, collapse = " + "))
       mu.f <- as.formula(paste("y ~", paste(covariates, collapse = " + ")))

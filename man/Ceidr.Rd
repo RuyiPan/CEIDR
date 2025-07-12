@@ -39,19 +39,20 @@ Ceidr(
 
 \item{cov.interest}{Character vector of column names in `cov.df` that are the covariates of interest.}
 
-\item{between.mod}{For between-subject adjustment: a list specifying modeling formulas and GAMLSS families:
-If \code{between.mod = "default"}, the function will automatically construct a default linear model using all covariates
+\item{between.mod}{For between-subject adjustment: a list specifying modeling formulas for GAMLSS:
+If \code{between.mod = NULL}, the function will automatically construct a default linear model using all covariates
 provided via \code{cov.interest} and \code{cov.nuisance} as fixed effects. The same formula will be used for both
 the mean (\code{mu.formula1}, \code{mu.formula2}) and variance (\code{sigma.formula1}, \code{sigma.formula2})
 components. The GAMLSS families default to \code{NO()} for both modalities.
-If \code{between.mod = NULL}, the function will skipp between-subject adjustment
+If \code{between.mod = "skip"}, the function will skip between-subject adjustment
 \describe{
   \item{mu.formula1, mu.formula2}{Formulas for the mean of modality 1 and 2}
   \item{sigma.formula1, sigma.formula2}{Formulas for the variance of modality 1 and 2}
   \item{family1, family2}{GAMLSS families for each modality (e.g., \code{NO()})}
 }}
 
-\item{within.radius}{Radius (in distance units) used to define the local neighborhood for within-subject adjustment.}
+\item{within.radius}{Radius (in distance units) used to define the local neighborhood for within-subject adjustment.
+If \code{within.radius = 0}, the function will skip within-subject adjustment.}
 
 \item{max.radius}{Maximum radius for spatial cluster enhancement in the permutation step.}
 

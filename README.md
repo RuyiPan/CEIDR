@@ -2,7 +2,7 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # CEIDR
-
+📄 Paper: *Mapping individual differences in intermodal coupling in neurodevelopment* — https://direct.mit.edu/imag/article/doi/10.1162/IMAG.a.156/132916
 <!-- badges: start -->
 <!-- badges: end -->
 
